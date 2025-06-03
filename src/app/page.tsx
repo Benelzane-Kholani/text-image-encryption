@@ -5,6 +5,7 @@ import ToggleEncryption from './components/toggleEncryption';
 import './css/home.css';
 import Encrypt from './encrypt/page';
 import TextDecryption from './components/textDecryption';
+import ImageEncryption from './components/imageEncryption';
 
 export default function Home() {
   const [selectedOption, setSelectedOption] = useState<number>(1);
@@ -22,6 +23,7 @@ export default function Home() {
               <div className='mt-2'> 
                 <TextEncryption displayOption={selectedOption}/>
                 <TextDecryption displayOption={selectedOption}/>
+               <ImageEncryption displayOption={selectedOption}/>
               </div>
             </div>
     </div>
