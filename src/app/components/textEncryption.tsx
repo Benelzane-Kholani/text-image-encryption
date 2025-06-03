@@ -3,18 +3,34 @@ import { useState } from "react"
 export default function TextEncryption({displayOption}:{displayOption:number}){
 
     const [encryptedText, setEncryptedText] = useState<string>('');
+    const [encryptionPassword, setEncryptionPassword] = useState<string>('');
+    const [passwordError, setPasswordError] = useState<string>('');
 
 
-  async function encryptUserText(text: string): Promise<void> {
-    if(!text || text.trim().length === 0){
-      setEncryptedText('');
+    function handlePasswordChange(password:string){
+      if(password || password.trim().length !== 0){
+        setPasswordError('');
+        setEncryptionPassword(password);
+      }
+      else{
+        setPasswordError('Enter your password to start encryption');
+      }
     }
+    
+    async function encryptUserText(text: string): Promise<void> {
+      if(!encryptionPassword || encryptionPassword.trim().length === 0){
+        setPasswordError('Enter your password to start encryption');
+      }
+    else{
+      if(!text || text.trim().length === 0){
+        setEncryptedText('');
+      }
     else{
        const encoder = new TextEncoder();
-  const salt = window.crypto.getRandomValues(new Uint8Array(16));
-  const iv = window.crypto.getRandomValues(new Uint8Array(12)); // 12 bytes for AES-GCM
+       const salt = window.crypto.getRandomValues(new Uint8Array(16));
+       const iv = window.crypto.getRandomValues(new Uint8Array(12)); // 12 bytes for AES-GCM
 
-  const password = 'your-password';
+  const password = encryptionPassword;
   const keyMaterial = await window.crypto.subtle.importKey(
     'raw',
     encoder.encode(password),
@@ -52,6 +68,8 @@ export default function TextEncryption({displayOption}:{displayOption:number}){
   const base64 = btoa(String.fromCharCode(...combined));
   setEncryptedText(base64);
     }
+    }
+
  
 }
 
@@ -63,6 +81,15 @@ export default function TextEncryption({displayOption}:{displayOption:number}){
     }
 
     return(
+      <div className="encryptionContainer mt-4">
+      <div className="encryptionPassword">
+         {passwordError.length !== 0? <p className="text-rose-900 m-1">Enter your password to start encryption</p> : ""}
+        <input type="text" placeholder="encryption password"
+         className="placeholder:text-gray-500 border
+          border-indigo-500 rounded p-2 w-1/3"
+          onChange={e => handlePasswordChange(e.target.value)}
+          />
+      </div>
       <div className={`flex mt-6 gap-2 ${showDisplay()}`}>
         <div className='w-1/2 border border-indigo-500 rounded h-40'>
         <textarea className="w-full h-full placeholder:text-gray-500
@@ -75,6 +102,7 @@ export default function TextEncryption({displayOption}:{displayOption:number}){
   <div className='w-1/2 border rounded border-indigo-500 text-gray-400 p-2'>
     <p className="break-words">{encryptedText}</p>
   </div>
+</div>
 </div>
 
     )
