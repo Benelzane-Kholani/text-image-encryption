@@ -86,16 +86,31 @@ function useImageDecryption() {
             const url = URL.createObjectURL(decryptedBlob);
             setDecryptedImageUrl(url);
 
-        } catch (error: any) {
+         } catch (error: unknown) {
             console.error('Decryption failed:', error);
-            // Provide more user-friendly error messages
-            if (error.name === 'OperationError' && (error.message.includes('bad key') || error.message.includes('tag check failed'))) {
-                setDecryptionError('Decryption failed. Incorrect password or corrupted file.');
-            } else if (error.name === 'DataError') {
-                setDecryptionError('Decryption failed. Invalid data format or corrupted file.');
+
+            let errorMessage = 'Failed to decrypt image.';
+
+            if (error instanceof DOMException) {
+                switch (error.name) {
+                    case 'OperationError':
+                        errorMessage = 'Decryption failed. Incorrect password or corrupted file.';
+                        break;
+                    case 'DataError':
+                        errorMessage = 'Decryption failed. Invalid data format or corrupted file.';
+                        break;
+                    default:
+                        errorMessage = `Decryption error: ${error.message}`;
+                        break;
+                }
+            } else if (error instanceof Error) {
+                errorMessage = `Failed to decrypt image: ${error.message}`;
             } else {
-                setDecryptionError(`Failed to decrypt image: ${error.message || 'Unknown error'}.`);
+                // Fallback for non-standard errors (shouldn't happen often)
+                errorMessage = 'An unknown error occurred during decryption.';
             }
+
+            setDecryptionError(errorMessage);
         } finally {
             setIsDecrypting(false);
         }
